@@ -13,14 +13,7 @@ export default function App() {
           <Button title="Login" />
         </View>
         <Text>Resset passwords</Text>
-
-        
       </View>
-      <View style={{flexDirection: 'column', height: 300}}>
-          <View style={{flexGrow: 1, backgroundColor: 'red', width: 20, height}}></View>
-          <View style={{flexGrow: 2, backgroundColor: 'blue'}}></View>
-          <View style={{flexGrow: 1, backgroundColor: 'green'}}></View>
-        </View>
     </View>
   );
 }
