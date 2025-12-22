@@ -1,16 +1,34 @@
-import { Button, StyleSheet, Text, View, TextInput, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Dimensions, Image } from 'react-native';
+import { Input } from './shared/Input/input';
+import { Button } from './shared/Button/Button';
+import { Colors, Gaps } from './shared/tokens';
+import EyeClosedIcon from './assets/icons/eye-closed';
+import { ErrorNotification } from './shared/ErrorNotification/ErrorNotification';
+import { useState } from 'react';
+
 
 const width = Dimensions.get('window').width;
 
 export default function App() {
+  const [error, setError] = useState<string | undefined>();
+
+  const alert =  () => {
+    setError("An error occurred!");
+    setTimeout(() => setError(undefined), 3200);
+  };
+
   return (
     <View style={styles.container}>
+      <ErrorNotification error={error} />
       <View style={styles.content}>
-        <Text>Hello, Worlds!</Text>
+        <Image
+          style={styles.logo}
+          source={require('./assets/logo.png')}
+        />
         <View style={styles.form}>
-          <TextInput placeholder="Email" style={styles.input} />
-          <TextInput placeholder="Password" secureTextEntry={true} style={styles.input} />
-          <Button title="Login" />
+          <Input placeholder="Email"/>
+          <Input isPassword placeholder="Password" />
+          <Button title="Login" onPress={alert} />
         </View>
         <Text>Resset passwords</Text>
       </View>
@@ -23,16 +41,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 55,
+    backgroundColor: Colors.black,
   },
   content:{
     alignItems: 'center',
-    gap: 50,
+    gap: Gaps.g50,
   },
   form: {
     alignSelf: 'stretch',
-    gap: 16,
+    gap: Gaps.g16,
   },
-  input: {
-    backgroundColor: '#2E2D3D', 
+  logo: {
+    width: width - 110,
+    height: ((width - 110) / 750) * 250,
+    resizeMode: 'contain',
   }
 });
