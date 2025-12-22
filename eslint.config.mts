@@ -1,66 +1,118 @@
-import js from "@eslint/js";
-import tseslint from "typescript-eslint";
-import reactPlugin from "eslint-plugin-react";
-import reactNativePlugin from "eslint-plugin-react-native";
-import prettierPlugin from "eslint-plugin-prettier";
-import eslintConfigPrettier from "eslint-config-prettier";
+import js from '@eslint/js' // Базовые правила ESLint
+import react from 'eslint-plugin-react' // Правила для React
+// @ts-expect-error: Нет типов для eslint-plugin-react-native
+import reactNative from 'eslint-plugin-react-native' // Правила для React Native
+import prettier from 'eslint-plugin-prettier' // Интеграция Prettier в ESLint
+import prettierConfig from 'eslint-config-prettier' // Отключает конфликтующие с Prettier правила ESLint
+import globals from 'globals' // Глобальные переменные (window, document, console и т.д.)
+import tseslint from 'typescript-eslint' // Правила для TypeScript
 
-export default tseslint.config(
-  // 1. Базовые рекомендуемые настройки
-  js.configs.recommended,
-  ...tseslint.configs.recommended,
-
-  {
-    // 2. Настройки для файлов проекта
-    files: ["**/*.{ts,tsx,js,jsx}"],
-    plugins: {
-      react: reactPlugin,
-      "react-native": reactNativePlugin,
-      prettier: prettierPlugin,
+export default [
+    // `===``===``===``===``===``===``===`=
+    // НАСТРОЙКИ ИГНОРИРОВАНИЯ
+    // `===``===``===``===``===``===``===`=
+    {
+        ignores: [
+            'node_modules/', // Игнорируем зависимости
+            'android/', // Игнорируем нативные Android файлы
+            'ios/', // Игнорируем нативные iOS файлы
+        ],
     },
-    languageOptions: {
-      parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
+
+    // `===``===``===``===``===``===``===``===``===`
+    // ОСНОВНЫЕ НАСТРОЙКИ ФАЙЛОВ
+    // `===``===``===``===``===``===``===``===``===`
+    {
+        files: ['**/*.{ts,tsx,js,jsx}'], // Применять ко всем JS/TS и JSX/TSX файлам
+        languageOptions: {
+            parser: tseslint.parser, // Парсер для TypeScript
+            ecmaVersion: 'latest', // Последняя версия ECMAScript
+            sourceType: 'module', // Используем ES-модули
+            globals: {
+                ...globals.browser, // Глобальные переменные браузера (window, document)
+                ...globals.node, // Глобальные переменные Node.js (process, require)
+            },
         },
-      },
     },
-    settings: {
-      react: {
-        version: "detect",
-      },
-    },
-    rules: {
-      // Правила React Native
-      "react-native/no-unused-styles": "error",
-      "react-native/split-platform-components": "error",
-      "react-native/no-inline-styles": "error",
-      "react-native/no-color-literals": "error",
-      "react-native/no-raw-text": "error",
-      "react-native/no-single-element-style-arrays": "error",
 
-      // Правила TypeScript (из вашего конфига)
-      "@typescript-eslint/no-empty-function": "off",
-      "@typescript-eslint/explicit-function-return-type": "off",
-      "@typescript-eslint/explicit-module-boundary-types": "off",
-      // В новых версиях ban-types заменен на более точные правила, но для совместимости:
-      "@typescript-eslint/no-explicit-any": "warn",
+    // `===``===``===``===``===``===``===``===``===`
+    // БАЗОВЫЕ КОНФИГУРАЦИИ
+    // `===``===``===``===``===``===``===``===``===`
+    js.configs.recommended, // Рекомендуемые правила ESLint
+    ...tseslint.configs.recommended, // Рекомендуемые правила TypeScript
+    react.configs.flat.recommended, // Рекомендуемые правила React (flat config)
+    prettierConfig, // Отключает ESLint правила, конфликтующие с Prettier
 
-      // Prettier
-      "prettier/prettier": [
-        "error",
-        {
-          singleQuote: true,
-          useTabs: true,
-          semi: true,
-          trailingComma: "all",
-          bracketSpacing: true,
-          printWidth: 100,
-          endOfLine: "auto",
+    // `===``===``===``===``===``===``===``===``===`
+    // КАСТОМНЫЕ НАСТРОЙКИ
+    // `===``===``===``===``===``===``===``===``===`
+    {
+        plugins: {
+            prettier, // Плагин для интеграции Prettier
+            react, // Плагин React
+            'react-native': reactNative, // Плагин React Native
         },
-      ],
+        settings: {
+            react: {
+                version: 'detect', // Автоматически определяет версию React из package.json
+            },
+        },
+        rules: {
+            // `===``===``===``===``===``===``===`=
+            // PRETTIER ПРАВИЛА
+            // `===``===``===``===``===``===``===`=
+            'prettier/prettier': [
+                'error', // Уровень ошибки
+                {
+                    singleQuote: true, // Использовать одинарные кавычки
+                    useTabs: false, // Использовать пробелы вместо табов
+                    tabWidth: 4, // Ширина отступа 4 пробела
+                    semi: false, // Не использовать точку с запятой в конце выражений
+                    trailingComma: 'all', // Всегда добавлять trailing запятые
+                    bracketSpacing: true, // Пробелы между скобками в объектах { foo: bar }
+                    printWidth: 100, // Максимальная длина строки 100 символов
+                    endOfLine: 'auto', // Автоматически определять конец строки (LF/CRLF)
+                },
+            ],
+
+            // `===``===``===``===``===``===``===`=
+            // REACT ПРАВИЛА
+            // `===``===``===``===``===``===``===`=
+            'react/react-in-jsx-scope': 'off', // Не требовать импорт React в JSX (актуально для React 17+)
+            'react-hooks/exhaustive-deps': 'off', // Отключаем проверку зависимостей useEffect
+
+            // `===``===``===``===``===``===``===`=
+            // REACT NATIVE ПРАВИЛА
+            // `===``===``===``===``===``===``===`=
+            'react-native/no-unused-styles': 2, // Ошибка при неиспользуемых стилях
+            'react-native/split-platform-components': 2, // Ошибка при использовании platform-specific компонентов без разделения
+            'react-native/no-inline-styles': 2, // Ошибка при inline-стилях (предпочитать StyleSheet)
+            'react-native/no-color-literals': 2, // Ошибка при использовании литералов цветов (предпочитать константы)
+            'react-native/no-raw-text': 2, // Ошибка при использовании raw Text компонентов
+            'react-native/no-single-element-style-arrays': 2, // Ошибка при массивах стилей с одним элементом
+
+            // `===``===``===``===``===``===``===`=
+            // TYPESCRIPT ПРАВИЛА
+            // `===``===``===``===``===``===``===`=
+            '@typescript-eslint/no-empty-function': 'off', // Разрешаем пустые функции
+            '@typescript-eslint/interface-name-prefix': 'off', // Отключаем префикс 'I' для интерфейсов
+            '@typescript-eslint/ban-types': 'off', // Разрешаем все типы
+            '@typescript-eslint/explicit-function-return-type': 'off', // Не требовать явный возвращаемый тип у функций
+            '@typescript-eslint/explicit-module-boundary-types': 'off', // Не требовать типы у экспортов модулей
+            '@typescript-eslint/no-require-imports': [
+                'error',
+                {
+                    // разрешить require для загрузки следующих файлов
+                    allow: [
+                        '.(png|jpg|jpeg|gif|svg|webp|bmp)$', // все изображения
+                        '.(mp4|avi|mov|webm)$', // видео
+                        '.(mp3|wav|m4a|ogg)$', // аудио
+                        '.json$', // json файлы
+                        '.ttf$', // шрифты
+                        '.otf$', // шрифты
+                    ],
+                },
+            ],
+        },
     },
-  },
-  // 3. Отключаем конфликтующие правила (заменяет старый extends: ["prettier"])
-  eslintConfigPrettier
-);
+]
